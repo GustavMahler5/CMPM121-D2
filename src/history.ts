@@ -1,7 +1,7 @@
-import { CommandManager } from "./drawingcommands.ts";
+// import { CommandManager } from "./drawingcommands.ts";
 
 export class history {
-  private undoList: CommandManager[] = [];
+  // private undoList: CommandManager[] = [];
 
   undo(): void {
   }
