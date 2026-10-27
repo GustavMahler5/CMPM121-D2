@@ -61,32 +61,36 @@ canvas.addEventListener("mouseout", () => {
   cursor.active = false;
 });
 
-const undoButton = document.createElement("button");
-undoButton.textContent = "Undo";
-app.append(undoButton);
+function createButton(
+  textContent: string,
+  action: () => void,
+  notification: string,
+): HTMLButtonElement {
+  const button = document.createElement("button");
+  button.textContent = textContent;
+  button.addEventListener("click", () => {
+    action();
+    notify(notification);
+  });
+  app.append(button);
+  return button;
+}
 
-const redoButton = document.createElement("button");
-redoButton.textContent = "Redo";
-app.append(redoButton);
-
-const clearButton = document.createElement("button");
-clearButton.textContent = "Clear";
-app.append(clearButton);
-
-undoButton.addEventListener("click", () => {
-  history.undo();
-  notify("drawing-changed");
-});
-
-redoButton.addEventListener("click", () => {
-  history.redo();
-  notify("drawing-changed");
-});
-
-clearButton.addEventListener("click", () => {
-  history.clearAll();
-  notify("drawing-changed");
-});
+const undoButton = createButton(
+  "Undo",
+  () => history.undo(),
+  "drawing-changed",
+);
+const redoButton = createButton(
+  "Redo",
+  () => history.redo(),
+  "drawing-changed",
+);
+const clearButton = createButton(
+  "Clear",
+  () => history.clearAll(),
+  "drawing-changed",
+);
 
 function updateButtons(): void {
   undoButton.disabled = !history.canUndo();
