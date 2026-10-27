@@ -58,4 +58,16 @@ export class History {
   clearRedoList(): void {
     this.redoList = [];
   }
+
+  canUndo(): boolean {
+    return this.undoList.length > 0;
+  }
+
+  canRedo(): boolean {
+    return this.redoList.length > 0;
+  }
+
+  canClear(): boolean {
+    return this.commandManager.getLength() > 0;
+  }
 }

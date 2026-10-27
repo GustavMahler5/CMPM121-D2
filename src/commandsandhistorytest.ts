@@ -35,6 +35,7 @@ function notify(name: string): void {
 }
 
 bus.addEventListener("drawing-changed", draw);
+bus.addEventListener("drawing-changed", updateButtons);
 
 const cursor = { active: false, x: 0, y: 0 };
 
@@ -47,7 +48,6 @@ canvas.addEventListener("mousedown", (e) => {
 
 canvas.addEventListener("mouseup", () => {
   cursor.active = false;
-  notify("cursor-changed");
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -59,7 +59,6 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseout", () => {
   cursor.active = false;
-  notify("cursor-changed");
 });
 
 const undoButton = document.createElement("button");
@@ -88,5 +87,13 @@ clearButton.addEventListener("click", () => {
   history.clearAll();
   notify("drawing-changed");
 });
+
+function updateButtons(): void {
+  undoButton.disabled = !history.canUndo();
+  redoButton.disabled = !history.canRedo();
+  clearButton.disabled = !history.canClear();
+}
+
+updateButtons();
 
 console.log("eof");
