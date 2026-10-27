@@ -16,12 +16,28 @@ export class CommandManager {
   addCommand(command: Commands): void {
     this.commandList.push(command);
   }
+
   getCommands(): Commands[] {
     return this.commandList;
   }
-  execute(): void {
-    return;
+
+  removeLastCommand(): Commands | undefined {
+    return this.commandList.pop();
   }
+
+  removeAllCommands(): Commands[] {
+    const returnList: Commands[] = [];
+    while (this.getLength() > 0) {
+      const currentCommand = this.removeLastCommand();
+      if (currentCommand) returnList.push(currentCommand);
+    }
+    return returnList.reverse();
+  }
+
+  getLength(): number {
+    return this.commandList.length;
+  }
+
   executeAll(ctx: CanvasRenderingContext2D): void {
     for (const command of this.commandList) {
       ctx.beginPath();

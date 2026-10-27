@@ -1,5 +1,6 @@
 import { CommandManager } from "./drawingcommands.ts";
 import { Commands } from "./drawingcommands.ts";
+import { History } from "./history.ts";
 
 const app = document.querySelector<HTMLElement>("#app")!;
 
@@ -20,6 +21,7 @@ app.append(canvas);
 
 const bus = new EventTarget();
 const commandList = new CommandManager();
+const history = new History(commandList);
 let currentCommand: Commands;
 
 function draw() {
@@ -39,7 +41,7 @@ const cursor = { active: false, x: 0, y: 0 };
 canvas.addEventListener("mousedown", (e) => {
   cursor.active = true;
   currentCommand = { point: [{ x: e.offsetX, y: e.offsetY }] };
-  commandList.addCommand(currentCommand);
+  history.addStroke(currentCommand);
   notify("drawing-changed");
 });
 
@@ -58,6 +60,33 @@ canvas.addEventListener("mousemove", (e) => {
 canvas.addEventListener("mouseout", () => {
   cursor.active = false;
   notify("cursor-changed");
+});
+
+const undoButton = document.createElement("button");
+undoButton.textContent = "Undo";
+app.append(undoButton);
+
+const redoButton = document.createElement("button");
+redoButton.textContent = "Redo";
+app.append(redoButton);
+
+const clearButton = document.createElement("button");
+clearButton.textContent = "Clear";
+app.append(clearButton);
+
+undoButton.addEventListener("click", () => {
+  history.undo();
+  notify("drawing-changed");
+});
+
+redoButton.addEventListener("click", () => {
+  history.redo();
+  notify("drawing-changed");
+});
+
+clearButton.addEventListener("click", () => {
+  history.clearAll();
+  notify("drawing-changed");
 });
 
 console.log("eof");
