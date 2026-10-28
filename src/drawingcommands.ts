@@ -3,9 +3,20 @@ export type Point = {
   y: number;
 };
 
-export type Commands = {
+export type Stroke = {
+  toolType: "stroke";
   point: Point[];
+  thickness: number;
 };
+
+export type Sticker = {
+  toolType: "sticker";
+  position: Point;
+  content: string;
+  scale: number;
+};
+
+export type Commands = Stroke | Sticker;
 
 export class CommandManager {
   constructor() {
@@ -40,15 +51,18 @@ export class CommandManager {
 
   executeAll(ctx: CanvasRenderingContext2D): void {
     for (const command of this.commandList) {
-      ctx.beginPath();
-      const firstPoint: Point = command.point[0];
-      ctx.moveTo(firstPoint.x, firstPoint.y);
+      if (command.toolType === "stroke") {
+        ctx.lineWidth = command.thickness;
+        ctx.beginPath();
+        const firstPoint: Point = command.point[0];
+        ctx.moveTo(firstPoint.x, firstPoint.y);
 
-      for (const point of command.point) {
-        ctx.lineTo(point.x, point.y);
+        for (const point of command.point) {
+          ctx.lineTo(point.x, point.y);
+        }
+
+        ctx.stroke();
       }
-
-      ctx.stroke();
     }
   }
 }
