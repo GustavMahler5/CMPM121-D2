@@ -62,8 +62,6 @@ export class CommandManager {
         }
 
         ctx.stroke();
-      } else if (command.toolType === "sticker") {
-        ctx.fillText(command.content, command.position.x, command.position.y);
       }
     }
   }
