@@ -24,6 +24,8 @@ const commandList = new CommandManager();
 const history = new History(commandList);
 let currentCommand: Commands;
 
+let currentTool = "pen";
+
 function draw() {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,10 +42,22 @@ bus.addEventListener("drawing-changed", updateButtons);
 const cursor = { active: false, x: 0, y: 0 };
 
 canvas.addEventListener("mousedown", (e) => {
-  cursor.active = true;
-  currentCommand = { point: [{ x: e.offsetX, y: e.offsetY }] };
-  history.addStroke(currentCommand);
-  notify("drawing-changed");
+  if (currentTool === "pen" || currentTool === "marker") {
+    let thickness = 0;
+    if (currentTool === "pen") {
+      thickness = 1;
+    } else {
+      thickness = 10;
+    }
+    cursor.active = true;
+    currentCommand = {
+      toolType: "stroke",
+      point: [{ x: e.offsetX, y: e.offsetY }],
+      thickness: thickness,
+    };
+    history.addStroke(currentCommand);
+    notify("drawing-changed");
+  }
 });
 
 canvas.addEventListener("mouseup", () => {
@@ -52,8 +66,10 @@ canvas.addEventListener("mouseup", () => {
 
 canvas.addEventListener("mousemove", (e) => {
   if (cursor.active) {
-    currentCommand.point.push({ x: e.offsetX, y: e.offsetY });
-    notify("drawing-changed");
+    if (currentCommand.toolType === "stroke") {
+      currentCommand.point.push({ x: e.offsetX, y: e.offsetY });
+      notify("drawing-changed");
+    }
   }
 });
 
@@ -89,6 +105,16 @@ const redoButton = createButton(
 const clearButton = createButton(
   "Clear",
   () => history.clearAll(),
+  "drawing-changed",
+);
+const _penButton = createButton(
+  "Pen",
+  () => currentTool = "pen",
+  "drawing-changed",
+);
+const _markerButton = createButton(
+  "Marker",
+  () => currentTool = "marker",
   "drawing-changed",
 );
 
