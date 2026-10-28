@@ -24,7 +24,11 @@ const commandList = new CommandManager();
 const history = new History(commandList);
 let currentCommand: Commands;
 
-let currentTool = "pen";
+type Tool = StrokeTool | StickerTool;
+type StrokeTool = "pen" | "marker";
+type StickerTool = "smile" | "frown" | "hi";
+
+let currentTool: Tool = "pen";
 
 function draw() {
   if (!ctx) return;
@@ -55,9 +59,30 @@ canvas.addEventListener("mousedown", (e) => {
       point: [{ x: e.offsetX, y: e.offsetY }],
       thickness: thickness,
     };
-    history.addStroke(currentCommand);
-    notify("drawing-changed");
+  } else if (currentTool === "smile") {
+    currentCommand = {
+      toolType: "sticker",
+      position: { x: e.offsetX, y: e.offsetY },
+      content: ":)",
+      scale: 1,
+    };
+  } else if (currentTool === "frown") {
+    currentCommand = {
+      toolType: "sticker",
+      position: { x: e.offsetX, y: e.offsetY },
+      content: ":(",
+      scale: 1,
+    };
+  } else if (currentTool === "hi") {
+    currentCommand = {
+      toolType: "sticker",
+      position: { x: e.offsetX, y: e.offsetY },
+      content: "hi",
+      scale: 1,
+    };
   }
+  history.addCommand(currentCommand);
+  notify("drawing-changed");
 });
 
 canvas.addEventListener("mouseup", () => {
@@ -115,6 +140,21 @@ const _penButton = createButton(
 const _markerButton = createButton(
   "Marker",
   () => currentTool = "marker",
+  "drawing-changed",
+);
+const _smileButton = createButton(
+  "Smile Sticker",
+  () => currentTool = "smile",
+  "drawing-changed",
+);
+const _frownButton = createButton(
+  "Frown Sticker",
+  () => currentTool = "frown",
+  "drawing-changed",
+);
+const _hiButton = createButton(
+  '"Hi" Sticker',
+  () => currentTool = "hi",
   "drawing-changed",
 );
 

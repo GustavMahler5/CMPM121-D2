@@ -2,7 +2,7 @@ import { CommandManager } from "./drawingcommands.ts";
 import { Commands } from "./drawingcommands.ts";
 
 type HistoryAction =
-  | { type: "stroke"; command: Commands }
+  | { type: "command"; command: Commands }
   | { type: "clear"; commands: Commands[] };
 
 export class History {
@@ -12,9 +12,9 @@ export class History {
   constructor(private commandManager: CommandManager) {
   }
 
-  addStroke(command: Commands): void {
+  addCommand(command: Commands): void {
     this.commandManager.addCommand(command);
-    this.undoList.push({ type: "stroke", command });
+    this.undoList.push({ type: "command", command });
     this.clearRedoList();
   }
 
@@ -22,7 +22,7 @@ export class History {
     const currentCommand = this.undoList.pop();
     if (!currentCommand) return;
 
-    if (currentCommand.type == "stroke") {
+    if (currentCommand.type == "command") {
       this.commandManager.removeLastCommand();
     } else if (currentCommand.type == "clear") {
       for (const command of currentCommand.commands) {
@@ -37,7 +37,7 @@ export class History {
     const currentCommand = this.redoList.pop();
     if (!currentCommand) return;
 
-    if (currentCommand.type == "stroke") {
+    if (currentCommand.type == "command") {
       this.commandManager.addCommand(currentCommand.command);
     } else if (currentCommand.type == "clear") {
       this.commandManager.removeAllCommands();
