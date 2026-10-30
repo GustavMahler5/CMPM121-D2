@@ -13,7 +13,6 @@ export type Sticker = {
   toolType: "sticker";
   position: Point;
   content: string;
-  scale: number;
 };
 
 export type Commands = Stroke | Sticker;

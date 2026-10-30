@@ -99,7 +99,6 @@ canvas.addEventListener("mousedown", (e) => {
       toolType: "sticker",
       position: { x: e.offsetX, y: e.offsetY },
       content: currentTool.content,
-      scale: 1,
     };
   }
   history.addCommand(currentCommand);
@@ -138,6 +137,14 @@ function createButton(
   return button;
 }
 
+function createToolButton(tool: Tool) {
+  createButton(
+    tool.name,
+    () => currentTool = tool,
+    "drawing-changed",
+  );
+}
+
 const undoButton = createButton(
   "Undo",
   () => history.undo(),
@@ -155,12 +162,37 @@ const clearButton = createButton(
 );
 
 tools.forEach((tool) => {
-  createButton(
-    tool.name,
-    () => currentTool = tool,
-    "drawing-changed",
-  );
+  createToolButton(tool);
 });
+
+const toolNameInput = document.createElement("input");
+toolNameInput.type = "text";
+toolNameInput.placeholder = "Custom Sticker Name";
+app.append(toolNameInput);
+
+const toolContentInput = document.createElement("input");
+toolContentInput.type = "text";
+toolContentInput.placeholder = "Custom Sticker Content";
+app.append(toolContentInput);
+
+createButton(
+  "Create Sticker",
+  () => {
+    if (
+      !(toolNameInput.value.trim() === "") &&
+      !(toolContentInput.value.trim() === "")
+    ) {
+      const customTool: StickerTool = {
+        name: toolNameInput.value.trim(),
+        toolType: "sticker",
+        content: toolContentInput.value.trim(),
+      };
+      tools.push(customTool);
+      createToolButton(customTool);
+    }
+  },
+  "drawing-changed",
+);
 
 function updateButtons(): void {
   undoButton.disabled = !history.canUndo();
