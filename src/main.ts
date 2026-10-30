@@ -37,4 +37,5 @@ canvas.addEventListener("mousemove", (e) => {
 canvas.addEventListener("mouseup", () => {
   cursor.active = false;
 });
+
 console.log("eof");
