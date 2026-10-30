@@ -25,10 +25,48 @@ const history = new History(commandList);
 let currentCommand: Commands;
 
 type Tool = StrokeTool | StickerTool;
-type StrokeTool = "pen" | "marker";
-type StickerTool = "smile" | "frown" | "hi";
+type StrokeTool = {
+  name: string;
+  toolType: "stroke";
+  thickness: number;
+};
+type StickerTool = {
+  name: string;
+  toolType: "sticker";
+  content: string;
+};
 
-let currentTool: Tool = "pen";
+const tools: Tool[] = [
+  {
+    name: "Pen",
+    toolType: "stroke",
+    thickness: 1,
+  },
+  {
+    name: "Marker",
+    toolType: "stroke",
+    thickness: 10,
+  },
+  {
+    name: "Smile Sticker",
+    toolType: "sticker",
+    content: ":)",
+  },
+  {
+    name: "Frown Sticker",
+    toolType: "sticker",
+    content: ":(",
+  },
+  {
+    name: "Hi Sticker",
+    toolType: "sticker",
+    content: "hi",
+  },
+];
+
+let currentTool: Tool | undefined = tools.find(
+  (tool) => tool.name === "pen",
+);
 
 function draw() {
   if (!ctx) return;
@@ -46,38 +84,21 @@ bus.addEventListener("drawing-changed", updateButtons);
 const cursor = { active: false, x: 0, y: 0 };
 
 canvas.addEventListener("mousedown", (e) => {
-  if (currentTool === "pen" || currentTool === "marker") {
-    let thickness = 0;
-    if (currentTool === "pen") {
-      thickness = 1;
-    } else {
-      thickness = 10;
-    }
+  if (currentTool == undefined) {
+    return;
+  }
+  if (currentTool.toolType === "stroke") {
     cursor.active = true;
     currentCommand = {
       toolType: "stroke",
       point: [{ x: e.offsetX, y: e.offsetY }],
-      thickness: thickness,
+      thickness: currentTool.thickness,
     };
-  } else if (currentTool === "smile") {
+  } else if (currentTool.toolType === "sticker") {
     currentCommand = {
       toolType: "sticker",
       position: { x: e.offsetX, y: e.offsetY },
-      content: ":)",
-      scale: 1,
-    };
-  } else if (currentTool === "frown") {
-    currentCommand = {
-      toolType: "sticker",
-      position: { x: e.offsetX, y: e.offsetY },
-      content: ":(",
-      scale: 1,
-    };
-  } else if (currentTool === "hi") {
-    currentCommand = {
-      toolType: "sticker",
-      position: { x: e.offsetX, y: e.offsetY },
-      content: "hi",
+      content: currentTool.content,
       scale: 1,
     };
   }
@@ -132,31 +153,14 @@ const clearButton = createButton(
   () => history.clearAll(),
   "drawing-changed",
 );
-const _penButton = createButton(
-  "Pen",
-  () => currentTool = "pen",
-  "drawing-changed",
-);
-const _markerButton = createButton(
-  "Marker",
-  () => currentTool = "marker",
-  "drawing-changed",
-);
-const _smileButton = createButton(
-  "Smile Sticker",
-  () => currentTool = "smile",
-  "drawing-changed",
-);
-const _frownButton = createButton(
-  "Frown Sticker",
-  () => currentTool = "frown",
-  "drawing-changed",
-);
-const _hiButton = createButton(
-  '"Hi" Sticker',
-  () => currentTool = "hi",
-  "drawing-changed",
-);
+
+tools.forEach((tool) => {
+  createButton(
+    tool.name,
+    () => currentTool = tool,
+    "drawing-changed",
+  );
+});
 
 function updateButtons(): void {
   undoButton.disabled = !history.canUndo();
