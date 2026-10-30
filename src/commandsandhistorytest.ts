@@ -91,11 +91,36 @@ const clearButton = createButton(
   () => history.clearAll(),
   "drawing-changed",
 );
+const exportButton = createButton(
+  "Export",
+  () => exportPNG(2),
+  "drawing-changed",
+);
 
 function updateButtons(): void {
   undoButton.disabled = !history.canUndo();
   redoButton.disabled = !history.canRedo();
   clearButton.disabled = !history.canClear();
+}
+
+app.append(exportButton);
+
+function exportPNG(imgRatio: number) {
+  const exportCanvas = document.createElement("canvas");
+  exportCanvas.width = canvas.width * imgRatio;
+  exportCanvas.height = canvas.height * imgRatio;
+
+  const imgExport = exportCanvas.getContext("2d")!;
+  imgExport.fillStyle = "#ffffffff";
+  imgExport.fillRect(0, 0, exportCanvas.width, exportCanvas.height); // sets bg to white
+  imgExport.scale(imgRatio, imgRatio);
+
+  commandList.executeAll(imgExport); // draws from stack of strokes
+
+  const downloadLink = document.createElement("a"); // creates an invisible link in memory
+  downloadLink.href = exportCanvas.toDataURL("image/png"); // sets the data to a png of the canvas
+  downloadLink.download = `${heading.textContent}.png`; // sets the name of it to the heading
+  downloadLink.click(); // clicks ont the memory prompting the download
 }
 
 updateButtons();

@@ -18,6 +18,10 @@ export class History {
     this.clearRedoList();
   }
 
+  getUndo(): HistoryAction[] {
+    return this.undoList;
+  }
+
   undo(): void {
     const currentCommand = this.undoList.pop();
     if (!currentCommand) return;
