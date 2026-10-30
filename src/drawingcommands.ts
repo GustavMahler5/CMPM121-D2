@@ -14,6 +14,7 @@ export type Sticker = {
   toolType: "sticker";
   position: Point;
   content: string;
+  color?: string;
 };
 
 export type Commands = Stroke | Sticker;
@@ -64,6 +65,7 @@ export class CommandManager {
 
         ctx.stroke();
       } else if (command.toolType === "sticker") {
+        ctx.fillStyle = command.color || "#000000";
         ctx.fillText(command.content, command.position.x, command.position.y);
       }
     }

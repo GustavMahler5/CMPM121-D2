@@ -24,7 +24,8 @@ const commandList = new CommandManager();
 const history = new History(commandList);
 let currentCommand: Commands;
 
-type Tool = StrokeTool | StickerTool;
+let currentColor = "#000000";
+
 type StrokeTool = {
   name: string;
   toolType: "stroke";
@@ -35,7 +36,10 @@ type StickerTool = {
   name: string;
   toolType: "sticker";
   content: string;
+  color?: string;
 };
+
+type Tool = StrokeTool | StickerTool;
 
 const tools: Tool[] = [
   {
@@ -75,6 +79,8 @@ let currentTool: Tool | undefined = tools.find(
   (tool) => tool.name === "Pen",
 );
 
+let previousTool: Tool | undefined = currentTool;
+
 function draw() {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -100,13 +106,14 @@ canvas.addEventListener("mousedown", (e) => {
       toolType: "stroke",
       point: [{ x: e.offsetX, y: e.offsetY }],
       thickness: currentTool.thickness,
-      color: currentTool.color,
+      color: currentTool.color || currentColor,
     };
   } else if (currentTool.toolType === "sticker") {
     currentCommand = {
       toolType: "sticker",
       position: { x: e.offsetX, y: e.offsetY },
       content: currentTool.content,
+      color: currentTool.color || currentColor,
     };
   }
   history.addCommand(currentCommand);
@@ -148,7 +155,12 @@ function createButton(
 function createToolButton(tool: Tool) {
   createButton(
     tool.name,
-    () => currentTool = tool,
+    () => {
+      currentTool = tool;
+      if (currentTool.name != "Eraser") {
+        previousTool = currentTool;
+      }
+    },
     "drawing-changed",
   );
 }
@@ -188,6 +200,20 @@ toolContentInput.type = "text";
 toolContentInput.placeholder = "Custom Sticker Content";
 app.append(toolContentInput);
 
+const toolColorInput = document.createElement("input");
+toolColorInput.type = "color";
+toolColorInput.value = currentColor;
+toolColorInput.addEventListener("input", (e) => {
+  currentColor = (e.target as HTMLInputElement).value;
+  if (previousTool) {
+    currentTool = previousTool;
+  } else {
+    const penTool = tools.find((tool) => tool.name === "Pen");
+    if (penTool) currentTool = penTool;
+  }
+});
+app.append(toolColorInput);
+
 createButton(
   "Create Sticker",
   () => {
@@ -222,15 +248,14 @@ function exportPNG(imgRatio: number) {
 
   const imgExport = exportCanvas.getContext("2d")!;
   imgExport.fillStyle = "#ffffffff";
-  imgExport.fillRect(0, 0, exportCanvas.width, exportCanvas.height); // sets bg to white
+  imgExport.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
   imgExport.scale(imgRatio, imgRatio);
 
-  commandList.executeAll(imgExport); // draws from stack of strokes
-
-  const downloadLink = document.createElement("a"); // creates an invisible link in memory
-  downloadLink.href = exportCanvas.toDataURL("image/png"); // sets the data to a png of the canvas
-  downloadLink.download = `${heading.textContent}.png`; // sets the name of it to the heading
-  downloadLink.click(); // clicks ont the memory prompting the download
+  commandList.executeAll(imgExport);
+  const downloadLink = document.createElement("a");
+  downloadLink.href = exportCanvas.toDataURL("image/png");
+  downloadLink.download = `${heading.textContent}.png`;
+  downloadLink.click();
 }
 
 updateButtons();
