@@ -29,6 +29,7 @@ type StrokeTool = {
   name: string;
   toolType: "stroke";
   thickness: number;
+  color?: string;
 };
 type StickerTool = {
   name: string;
@@ -48,6 +49,12 @@ const tools: Tool[] = [
     thickness: 10,
   },
   {
+    name: "Eraser",
+    toolType: "stroke",
+    thickness: 5,
+    color: "#ffffff",
+  },
+  {
     name: "Smile Sticker",
     toolType: "sticker",
     content: ":)",
@@ -65,7 +72,7 @@ const tools: Tool[] = [
 ];
 
 let currentTool: Tool | undefined = tools.find(
-  (tool) => tool.name === "pen",
+  (tool) => tool.name === "Pen",
 );
 
 function draw() {
@@ -93,6 +100,7 @@ canvas.addEventListener("mousedown", (e) => {
       toolType: "stroke",
       point: [{ x: e.offsetX, y: e.offsetY }],
       thickness: currentTool.thickness,
+      color: currentTool.color,
     };
   } else if (currentTool.toolType === "sticker") {
     currentCommand = {
