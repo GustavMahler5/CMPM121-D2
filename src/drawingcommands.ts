@@ -7,12 +7,14 @@ export type Stroke = {
   toolType: "stroke";
   point: Point[];
   thickness: number;
+  color?: string;
 };
 
 export type Sticker = {
   toolType: "sticker";
   position: Point;
   content: string;
+  color?: string;
 };
 
 export type Commands = Stroke | Sticker;
@@ -51,6 +53,7 @@ export class CommandManager {
   executeAll(ctx: CanvasRenderingContext2D): void {
     for (const command of this.commandList) {
       if (command.toolType === "stroke") {
+        ctx.strokeStyle = command.color || "#000000";
         ctx.lineWidth = command.thickness;
         ctx.beginPath();
         const firstPoint: Point = command.point[0];
@@ -62,6 +65,7 @@ export class CommandManager {
 
         ctx.stroke();
       } else if (command.toolType === "sticker") {
+        ctx.fillStyle = command.color || "#000000";
         ctx.fillText(command.content, command.position.x, command.position.y);
       }
     }
